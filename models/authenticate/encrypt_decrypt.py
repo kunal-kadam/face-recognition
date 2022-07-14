@@ -57,3 +57,10 @@ def decrypt_client_side_v1(filepath):
             dec_v = ts.lazy_ckks_vector_from(dec_v_proto)
             dec_v.link_context(context)
             print(dec_v.decrypt())
+
+def remove_decrypted_files(frame_path, result_path):
+    try:
+        os.remove(frame_path)
+        os.remove(result_path)
+    except:
+        print("Files not found.")

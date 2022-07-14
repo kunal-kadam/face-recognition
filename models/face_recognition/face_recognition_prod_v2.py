@@ -13,8 +13,8 @@ from sockets import socket
 
 
 # Get verification frames
-get_frame('Front Face Verification', 1)
-get_frame('Front Face Reverification', 1)
+get_frame('Front Face Verification', 1, 'profile')
+get_frame('Front Face Reverification', 2, 'reverifyprofile')
 
 
 # Schedule a function in the backend thread for ever interval time
@@ -30,12 +30,13 @@ def collect_frames():
         filename = socket.receive_file_v2(f"frame{t}.txt", RESULT_PATH) # get the result file from the server via socket connection
         result = encrypt_decrypt.decrypt_client_side(filename) # decrypt the result
         print("Person face recognition score: ", result)
+        encrypt_decrypt.remove_decrypted_files(f"{FOLDER_PATH}frame{t}.txt", f"{RESULT_PATH}result_frame{t}.txt")
     else:
         pass # person not found in the frame
 
 
 # Start testing
-cam = cv2.VideoCapture("data/5.mov")
+cam = cv2.VideoCapture(0)
 
 
 # set the background thread

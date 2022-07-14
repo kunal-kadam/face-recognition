@@ -93,7 +93,7 @@ while True :
 
         cv2.imshow("webcamp", frame)
 
-        result_lr, distance = logistic_regression_model(shape=shape)
+        distance, result_lr = logistic_regression_model(shape=shape)
 
         if distance > MAR_THRESH and result_lr == 1.0:
             print("Yawning!")
