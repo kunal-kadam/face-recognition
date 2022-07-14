@@ -3,6 +3,7 @@ import cv2
 import os
 from deepface import DeepFace
 import concurrent.futures
+import numpy as np
 
 import sys
 sys.path.insert(0, './models')
@@ -16,7 +17,7 @@ def detect_face(image, filename):
     try:
         obj = DeepFace.represent(img_path = image, detector_backend = DETECTOR_BACKEND, model_name = MODEL_NAME)
         filename = os.path.join(IMAGE_PATH, filename)
-        encrypt_decrypt.encrypt_client_side(img_embedding=obj, file_name=filename)
+        encrypt_decrypt.encrypt_client_side(img_embedding=np.array(obj), file_name=filename)
         return 1
     except:
         print("Face could not be detected")
