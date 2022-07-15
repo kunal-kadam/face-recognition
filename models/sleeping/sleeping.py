@@ -6,8 +6,6 @@ from scipy.spatial import distance as dist
 from imutils import face_utils
 import dlib
 
-import playsound, random
-
 import sys
 sys.path.insert(0, './models')
 from utils import angle_between
@@ -101,8 +99,6 @@ while True :
         shape = face_utils.shape_to_np(shapes)
         print(data[j])
 
-        cv2.imshow("webcamp", frame)
-
         ear, dt_result = decision_tree_model(shape)
         
         if ear < EAR_THRESH and dt_result == 1.0:
@@ -115,6 +111,7 @@ while True :
         else:
             if(COUNTER > 0):
                 COUNTER -= 1 # person is active in this frame
+    cv2.imshow("webcamp", frame)
     if cv2.waitKey(1) & 0xFF == ord('q') : 
             break
 

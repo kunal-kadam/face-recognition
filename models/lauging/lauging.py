@@ -1,111 +1,85 @@
-# importing library
+# Importing required library
 import numpy as np
-import cv2
-import dlib
-import time 
-from imutils import face_utils
-import pandas as pd
-from tqdm import tqdm
+import cv2, json
 
-# loading data
-dataframe = pd.read_csv('./data/nthu8/train/lauging/laugh.csv', index_col=0)
-print(dataframe.shape)
-print(dataframe.head(4))
+import mediapipe
 
-# constants and initials
-EPOCH = 5
-TRAIN_SIZE = dataframe.shape[0]
-ERROR_EXP = 0.01
-MOR_LIMIT = 20.4195
-LR = 0.05
+import sys
+sys.path.insert(0, './models')
+from utils import angle_between
+import models
+import play_mp3
 
-# models
-face_model = dlib.get_frontal_face_detector()
-landmark_model = dlib.shape_predictor('./models/shape_predictor_68_face_landmarks.dat')
 
-# calculate lip distance
-def lip_distance(shape):
-    top_lip = shape[50:53]
-    top_lip = np.concatenate((top_lip, shape[61:64]))
+# Defining constants
+LAR_CONSEC_FRAMES = 40
+COUNTER = 0
 
-    low_lip = shape[56:59]
-    low_lip = np.concatenate((low_lip, shape[65:68]))
+# Loading pretrained models
+mp_face_mesh = mediapipe.solutions.face_mesh
+face_mesh = mp_face_mesh.FaceMesh(static_image_mode = False)
+with open('./models/decision_tree_laughing_nthu.txt', 'r') as file:
+    json_text = json.load(file)
+model_test = models.deserialize_decision_tree(json_text)
 
-    top_mean = np.mean(top_lip, axis=0)
-    low_mean = np.mean(low_lip, axis=0)
 
-    distance = abs(top_mean[1] - low_mean[1])
-    return distance
+# ML model that predicts the sleepiness of the person in frame
+def decision_tree_model(shape):
+    '''
+    **Input
+    shape -> np.array (468)landmarks mediapipe
+    **Output
+    result -> 0(Active) 1(Yawning) 2(Speaking)
+    '''
+    mla = angle_between((shape[17].x, shape[17].y), (shape[61].x, shape[61].y), (shape[0].x, shape[0].y))
+    mua = angle_between((shape[61].x, shape[61].y), (shape[0].x, shape[0].y), (shape[292].x, shape[292].y))
+    nta = angle_between((shape[48].x, shape[48].y), (shape[4].x, shape[4].y), (shape[289].x, shape[289].y))
+    cna = angle_between((shape[206].x, shape[206].y), (shape[4].x, shape[4].y), (shape[426].x, shape[426].y))
+    mna = angle_between((shape[61].x, shape[61].y), (shape[4].x, shape[4].y), (shape[292].x, shape[292].y))
+    cra = angle_between((shape[289].x, shape[289].y), (shape[280].x, shape[280].y), (shape[292].x, shape[292].y))
+    cria = angle_between((shape[289].x, shape[289].y), (shape[426].x, shape[426].y), (shape[292].x, shape[292].y))
 
-# calculate error
-def calculate_error(actual, predict):
-  # actual 1D array, predict 1D array
-  result = (((actual*-2)+1) - ((predict*-2)+1)) / 2
-  exp = []
-  a = ERROR_EXP
-  for i in range(result.shape[0]-1):
-    if result[i] != 0:
-      if result[i-1] == result[i] or i == 0:
-        exp.append(np.exp(a))
-        a += ERROR_EXP
-      elif result[i-1] != result[i]:
-        a = ERROR_EXP
-        exp.append(np.exp(a))
-        a += ERROR_EXP
-    else:
-      exp.append(0)
-      a = ERROR_EXP
-    return np.sum(exp*result)
+    return  model_test.predict(np.array([[mla, mua, nta, cna, mna, cra, cria]]))[0]
 
-for i in tqdm(range(EPOCH)):
-    for v in tqdm(range(0, TRAIN_SIZE)):
-        # video
-        cam = cv2.VideoCapture('./data/nthu8/train/lauging/'+dataframe.iloc[v].video)
-        print('./data/nthu8/train/lauging/'+dataframe.iloc[v].video)
 
-        # label
-        file=open('./data/nthu8/train/lauging/label/'+dataframe.iloc[v].label, 'r')
-        print('./data/nthu8/train/lauging/label/'+dataframe.iloc[v].label)
-        data = file.read()
-        data = np.array(list(data)).astype(int)
-        predict_data = []
-        actual_data = []
-        j = -1
-        while True : 
-            suc, frame = cam.read()
-            
-            if not suc : 
-                break
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_model(gray)
-            j += 1
-            for face in faces:
-              #detect landmarks
-              shapes = landmark_model(gray, face)
-              shape = face_utils.shape_to_np(shapes)
+# Testing frame
+cam = cv2.VideoCapture('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
+print('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
 
-              distance = lip_distance(shape=shape)
-              print(distance)
-              if(distance > MOR_LIMIT): 
-                  predict_data.append(1)
-                  print(1, data[j])
-                  actual_data.append(data[j])
-              else: 
-                  predict_data.append(0)
-                  print(0, data[j])
-                  actual_data.append(data[j])
-            #   if(j < data.shape[0]-1): j += 1
+# Testing frame labels data\nthu8\train\yawning\noglasses_002_yawning.avi
+file=open('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt', 'r')
+print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
+data = file.read() 
+data = np.array(list(data)).astype(int)
+j = -1
 
-            cv2.imshow("webcamp", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q') : 
-                break
-        predict_data = np.array(predict_data)
-        actual_data = np.array(actual_data)
-        # error = calculate_error(actual_data, predict_data)
-        error = np.sum(np.abs(actual_data-predict_data))/actual_data.shape[0]
-        if(np.sum(actual_data) > np.sum(predict_data)): error = -error*ERROR_EXP
-        MOR_LIMIT = MOR_LIMIT + ((LR/(i+1)) * error)
-
-        print(f"EPOCH {i} : TRAIN VIDEO {v} : error {error} : MOR_LIMIT {MOR_LIMIT}")
+# Start testing
+while True : 
+    suc, frame = cam.read()
+    
+    if not suc :
         cv2.destroyAllWindows()
-        #52
+        break
+
+    results = face_mesh.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    if results.multi_face_landmarks == None: continue
+
+    j += 1
+    for face in results.multi_face_landmarks:
+        dt_result = decision_tree_model(face.landmark)
+        print(data[j])
+
+        if dt_result == 2.0:
+            print('Speaking!')
+            COUNTER += 1
+            if (COUNTER > LAR_CONSEC_FRAMES):
+                print("Hello keep quite :>")
+                COUNTER = -5
+                play_mp3.play("speak")
+        else:
+            if(COUNTER > 0):
+                COUNTER -= 1 # person is active in this frame
+    cv2.imshow("webcamp", frame)
+    if cv2.waitKey(1) & 0xFF == ord('q') : 
+        break
+        
