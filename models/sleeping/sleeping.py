@@ -71,11 +71,11 @@ def decision_tree_model(shape):
     return ear, model_test.predict(np.array([[lia, ria, lar, rar]]))[0]
 
 # Testing frame
-cam = cv2.VideoCapture('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
+cam = cv2.VideoCapture('./data/nthu8/train/sleepy/night_noglasses_023_slowBlinkWithNodding.avi')
 print('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
 
 # Testing frame labels
-file=open('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt', 'r')
+file=open('./data/nthu8/train/sleepy/label/night_noglasses_023_slowBlinkWithNodding_eye.txt', 'r')
 print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
 data = file.read() 
 data = np.array(list(data)).astype(int)
