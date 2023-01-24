@@ -71,15 +71,16 @@ def decision_tree_model(shape):
     return ear, model_test.predict(np.array([[lia, ria, lar, rar]]))[0]
 
 # Testing frame
+# cam = cv2.VideoCapture(0)
 cam = cv2.VideoCapture('./data/nthu8/train/sleepy/night_noglasses_023_slowBlinkWithNodding.avi')
 print('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
 
 # Testing frame labels
-file=open('./data/nthu8/train/sleepy/label/night_noglasses_023_slowBlinkWithNodding_eye.txt', 'r')
-print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
-data = file.read() 
-data = np.array(list(data)).astype(int)
-j = -1
+# file=open('./data/nthu8/train/sleepy/label/night_noglasses_023_slowBlinkWithNodding_eye.txt', 'r')
+# print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
+# data = file.read() 
+# data = np.array(list(data)).astype(int)
+# j = -1
 
 # Start testing
 while True : 
@@ -92,12 +93,12 @@ while True :
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_model(gray) # detect face
 
-    j += 1
+    # j += 1
     for face in faces:
         # detect landmarks
         shapes = landmark_model(gray, face)
         shape = face_utils.shape_to_np(shapes)
-        print(data[j])
+        # print(data[j])
 
         ear, dt_result = decision_tree_model(shape)
         

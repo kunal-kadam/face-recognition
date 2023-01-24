@@ -14,7 +14,7 @@ from sockets import socket
 
 # Get verification frames
 get_frame('Front Face Verification', 1, 'profile')
-get_frame('Front Face Reverification', 2, 'reverifyprofile')
+# get_frame('Front Face Reverification', 2, 'reverifyprofile')
 
 
 # Schedule a function in the backend thread for ever interval time

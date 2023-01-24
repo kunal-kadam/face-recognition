@@ -63,14 +63,15 @@ def logistic_regression_model(shape):
 
 # Testing frame
 cam = cv2.VideoCapture('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
+# cam = cv2.VideoCapture(0)
 print('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
 
 # Testing frame labels
-file=open('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt', 'r')
-print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
-data = file.read() 
-data = np.array(list(data)).astype(int)
-j = -1
+# file=open('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt', 'r')
+# print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
+# data = file.read() 
+# data = np.array(list(data)).astype(int)
+# j = -1
 
 # Starting testing
 while True : 
@@ -84,12 +85,12 @@ while True :
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_model(gray)
 
-    j += 1
+    # j += 1
     for face in faces:
         # detect landmarks
         shapes = landmark_model(gray, face)
         shape = face_utils.shape_to_np(shapes)
-        print(data[j])
+        # print(data[j])
 
         cv2.imshow("webcamp", frame)
 

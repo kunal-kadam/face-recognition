@@ -43,15 +43,16 @@ def decision_tree_model(shape):
 
 
 # Testing frame
-cam = cv2.VideoCapture('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
+# cam = cv2.VideoCapture('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
+cam = cv2.VideoCapture(0)
 print('./data/nthu8/train/lauging/glasses_009_nonsleepyCombination.avi')
 
 # Testing frame labels data\nthu8\train\yawning\noglasses_002_yawning.avi
-file=open('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt', 'r')
-print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
-data = file.read() 
-data = np.array(list(data)).astype(int)
-j = -1
+# file=open('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt', 'r')
+# print('./data/nthu8/train/lauging/label/glasses_009_nonsleepyCombination_mouth.txt')
+# data = file.read() 
+# data = np.array(list(data)).astype(int)
+# j = -1
 
 # Start testing
 while True : 
@@ -64,10 +65,10 @@ while True :
     results = face_mesh.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
     if results.multi_face_landmarks == None: continue
 
-    j += 1
+    # j += 1
     for face in results.multi_face_landmarks:
         dt_result = decision_tree_model(face.landmark)
-        print(data[j])
+        # print(data[j])
 
         if dt_result == 2.0:
             print('Speaking!')
